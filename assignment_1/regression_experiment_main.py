@@ -235,7 +235,7 @@ def main():
     # model_learning_rate_experiment(X_train, y_train, X_val, y_val, X_test, y_test)
     # model_batch_size_experiment(X_train, y_train, X_val, y_val, X_test, y_test)
     #model_epochs_number_experiment(X_train, y_train, X_val, y_val, X_test, y_test)
-    model_initialization_experiment(X_train, y_train, X_val, y_val, X_test, y_test)
+    # model_initialization_experiment(X_train, y_train, X_val, y_val, X_test, y_test)
 
 if __name__ == "__main__":
     main()

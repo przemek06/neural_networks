@@ -1,15 +1,16 @@
 import math
-from assignment_2.utils import generate_layers
+from utils import generate_layers
 from layer.relu_layer import ReluLayer
 
 class Model:
-    def __init__(self, learning_rate, epochs, batch_size, initialization, layer_sizes) -> None:
-        self._layers = generate_layers(layer_sizes, initialization, ReluLayer, self.last_layer_class())
+    def __init__(self, learning_rate, epochs, batch_size, layer_sizes) -> None:
+        self._layers = generate_layers(layer_sizes, ReluLayer, self.last_layer_class())
         self._learning_rate = learning_rate
         self._epochs = epochs
         self._batch_size = batch_size
         self.loss_data_points = []
         self.accuracy_data_points = []
+        self.train_loss_data_point = []
 
     def forward_propagation(self, X):
         A = X
@@ -30,6 +31,7 @@ class Model:
         X = X
         y = y
         for epoch in range(self._epochs):
+            print(epoch)
             i=0
             num_of_batches = int(len(X)/self._batch_size)
 
@@ -48,6 +50,10 @@ class Model:
             accuracy = self.evaluation(y_valid.T, y_pred)
             self.loss_data_points.append(loss)
             self.accuracy_data_points.append(accuracy)
+            y_train_probabilities = self.forward_propagation(X.T)
+            train_loss = self.calculate_loss(y_train_probabilities, y.T)
+            self.train_loss_data_point.append(train_loss)
+
 
     def calculate_loss(self, y_pred, y):
         pass

@@ -1,4 +1,5 @@
 from model.binary_classification_model import BinaryClassificationModel
+from model.tanh_binary_classification_model import TanhBinaryClassificationModel
 from utils import he_initialization, uniform_initialization, random_initializaton, plot
 from loader.heart_disease_data_loader import DataLoader
 
@@ -228,14 +229,41 @@ def model_initialization_experiment(X_train, y_train, X_val, y_val, X_test, y_te
     print("Accuracy for radnom initialization in binary classification: " + str(evaluation))
     print("\n=================\n")
 
+def model_activation_experiment(X_train, y_train, X_val, y_val, X_test, y_test):
+    print("ACTIVATION FUNCTION EXPERIMENT")
+    print("\n=================\n")
+
+        
+    model1 = BinaryClassificationModel(0.001, 2000, 20, he_initialization,  [13, 64, 32])
+    model1.train(X_train, y_train, X_val, y_val)
+
+    y_pred = model1.predict(X_test)
+
+    evaluation = model1.evaluation(y_test.T, y_pred)
+    plot(model1.accuracy_data_points, "accuracy", "sigmoid activation accuracy")
+    plot(model1.loss_data_points, "loss", "sigmoid activation loss")
+    print("Accuracy for sigmoid activation in binary classification: " + str(evaluation))
+    print("\n=================\n")
+
+    model2 = TanhBinaryClassificationModel(0.001, 2000, 20, he_initialization,  [13, 64, 32])
+    model2.train(X_train, y_train, X_val, y_val)
+    y_pred = model2.predict(X_test)
+
+    evaluation = model2.evaluation(y_test.T, y_pred)
+    plot(model2.accuracy_data_points, "accuracy", "tanh activation accuracy")
+    plot(model2.loss_data_points, "loss", "tanh activation loss")
+    print("Accuracy for tanh activation in binary classification: " + str(evaluation))
+    print("\n=================\n")
+
 def main():
     loader = DataLoader()
     X_train, y_train, X_val, y_val, X_test, y_test = loader.preprocess()
     #model_dimensionality_experiment(X_train, y_train, X_val, y_val, X_test, y_test)
     # model_learning_rate_experiment(X_train, y_train, X_val, y_val, X_test, y_test)
-    # model_batch_size_experiment(X_train, y_train, X_val, y_val, X_test, y_test)
+    model_batch_size_experiment(X_train, y_train, X_val, y_val, X_test, y_test)
     # model_epochs_number_experiment(X_train, y_train, X_val, y_val, X_test, y_test)
-    model_initialization_experiment(X_train, y_train, X_val, y_val, X_test, y_test)
+    # model_initialization_experiment(X_train, y_train, X_val, y_val, X_test, y_test)
+    # model_activation_experiment(X_train, y_train, X_val, y_val, X_test, y_test)
 
 if __name__ == "__main__":
     main()
