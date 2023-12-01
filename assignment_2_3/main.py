@@ -21,12 +21,16 @@ def autoencoder_execution(X_train, y_train, X_val, y_val, X_test, y_test):
     autoencoder = AutoencoderModel(0.001, 50, 200, [784, 256, 64, 256, 784])
     autoencoder.train(X_train, X_train, X_val, X_val)
 
+    pred = autoencoder.encode(X_test.T)
+    plot_umap("main_model_umap.png", pred.T, y_test)
+
     X_train_encoded = autoencoder.encode(X_train.T).T
     X_val_encoded = autoencoder.encode(X_val.T).T
     X_test_encoded = autoencoder.encode(X_test.T).T
 
     model = SoftmaxClassificationModel(0.01, 100, 50, [64, 512, 256, 10])
     model.train(X_train_encoded, y_train, X_val_encoded, y_val)
+
 
     plot([model.loss_data_points], [""], "Validation loss", "autoencoder_val_loss")
     plot([model.accuracy_data_points], [""], "Accuracy", "autoencoder_accuracy")
@@ -58,7 +62,7 @@ def standard_execution(X_train, X_val, X_test, y_test):
 def main():
     loader = DataLoader()
     X_train, y_train, X_val, y_val, X_test, y_test = loader.preprocess()
-    no_autoencoder_execution(X_train, y_train, X_val, y_val, X_test, y_test)
+    # no_autoencoder_execution(X_train, y_train, X_val, y_val, X_test, y_test)
     autoencoder_execution(X_train, y_train, X_val, y_val, X_test, y_test)
 
 if __name__ == "__main__":

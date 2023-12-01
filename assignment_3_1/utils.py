@@ -24,7 +24,7 @@ def vector_descaling(vector):
     return vector * 255/np.max(vector)
 
 def binary_accuracy(y_true, y_pred):
-    return (y_true == y_pred).mean()
+    return (y_true == y_pred).all(axis=0).mean()
 
 def mean_absolute_error(y_true, y_pred):
     return np.mean(np.abs(y_true - y_pred))
@@ -124,5 +124,4 @@ def plot_umap(name, X, y):
     plt.scatter(trans.embedding_[:, 0], trans.embedding_[:, 1], s= 5, c=y, cmap='Spectral')
     plt.title('Embedding of the training set by UMAP', fontsize=24)
     plt.savefig(f"images/{name}", bbox_inches='tight', pad_inches=0, transparent=False, dpi = 960)
-    plt.colorbar()
     plt.show()
