@@ -14,28 +14,27 @@ class ConvLayer:
         self._W = self.kernel_initialization(out_size, in_size, kernel_size)
         self._b = self.initialization(out_size)
 
-    def add_out_dimension(self, original_tensor, out):
-        original_shape = original_tensor.shape
+    def add_out_dimension(self, tensor, m):
+        batch_size, in_size, n, _ = tensor.shape
 
-        reshaped_tensor = np.reshape(original_tensor, (original_shape[0], 1, *original_shape[1:]))
+        tensor = tensor[:, np.newaxis, :, :, :]
 
-        new_tensor = np.tile(reshaped_tensor, (1, out, 1, 1, 1, 1, 1))
+        tensor = np.tile(tensor, (1, m, 1, 1, 1))
 
-        final_shape = (original_shape[0], out, *original_shape[1:])
-        new_tensor = np.reshape(new_tensor, final_shape)
-        return new_tensor
+        tensor = tensor.reshape(batch_size, m, in_size, n, n)
+
+        return tensor
     
-    
-    def add_in_dimension(self, original_tensor, _in):
-        original_shape = original_tensor.shape
+    def add_in_dimension(self, tensor, in_size):
+        batch_size, out_size, n, _ = tensor.shape
 
-        reshaped_tensor = np.reshape(original_tensor, (original_shape[0], original_shape[1], 1, *original_shape[2:]))
+        tensor = tensor[:, :, np.newaxis, :, :]
 
-        new_tensor = np.tile(reshaped_tensor, (1, 1, _in, 1, 1, 1, 1))
+        tensor = np.tile(tensor, (1, 1, in_size, 1, 1))
 
-        final_shape = (original_shape[0], original_shape[1], _in, *original_shape[2:])
-        new_tensor = np.reshape(new_tensor, final_shape)
-        return new_tensor
+        tensor = tensor.reshape(batch_size, out_size, in_size, n, n)
+
+        return tensor
 
     def convolve_images_with_kernels(self, images, kernels):
         out, _in, n, _ = kernels.shape
@@ -74,7 +73,8 @@ class ConvLayer:
 
     # NOT SURE ABOUT SHAPES
     def calculate_dW(self, dA):
-        reshaped_dA = np.reshape(dA, (dA.shape[0], self._out_size, 1, dA.shape[-2], dA.shape[-1]))
+        # reshaped_dA = np.reshape(dA, (dA.shape[0], self._out_size, dA.shape[-2], dA.shape[-1]))
+        reshaped_dA = self.add_in_dimension(dA, self._in_size)
         # print(f"dW reshaped dA = {reshaped_dA.shape}")
 
         batch_size, out, _in, n, _ = reshaped_dA.shape
@@ -82,11 +82,11 @@ class ConvLayer:
         # if _in != images.shape[1]:
         #     raise Exception("Dimensions of input and kernels are not the same.")
         
-        modified_images = self.add_out_dimension(self._A_prev, out)
+        reshaped_A_prev = self.add_out_dimension(self._A_prev, out)
 
-        windows = np.lib.stride_tricks.sliding_window_view(modified_images, (n, n), axis=(-1, -2))
+        windows = np.lib.stride_tricks.sliding_window_view(reshaped_A_prev, (n, n), axis=(-1, -2))
 
-        feature_maps = np.sum(windows * reshaped_dA.reshape(batch_size, out, 1, 1, 1, n, n), axis=(0, -2, -1))
+        feature_maps = np.sum(windows * reshaped_dA.reshape(batch_size, out, _in, 1, 1, n, n), axis=(0, -2, -1))
         return np.reshape(feature_maps, (out, self._in_size, self.kernel_size, self.kernel_size)) / batch_size
 
     def calculate_db(self, dA):
@@ -95,9 +95,10 @@ class ConvLayer:
     # NOT SURE ABOUT SHAPES
     def calculate_dX(self, dA):
         rotated_kernels = self.rotate_180(self._W)
+        
         padded_dA = self.pad_images(dA, self.kernel_size - 1)
-
         reshaped_dA = self.add_in_dimension(padded_dA, self._in_size)
+
         windows = np.lib.stride_tricks.sliding_window_view(reshaped_dA, (self.kernel_size, self.kernel_size), axis=(-1, -2))
 
         feature_maps = np.sum(windows * rotated_kernels.reshape(1, self._out_size, self._in_size, 1, 1, self.kernel_size, self.kernel_size), axis=(-6, -2, -1))
@@ -108,14 +109,18 @@ class ConvLayer:
         self._W=self._W - learning_rate*self._dW
         self._b=self._b - learning_rate*self._db
 
-        if (self._dW == 0).all():
-            print("dW zeroed")
+        # if (self._dW == 0).all():
+        #     print("dW zeroed")
+        # else:
+        #     print("not zeroed")
 
-        if (self._db == 0).all():
-            print("db zeroed")
+        # if (self._db == 0).all():
+        #     print("db zeroed")
+        # else:
+        #     print("not zeroed")
 
     def kernel_initialization(self, out_size, in_size, kernel_size):
-        boundary = np.sqrt(2.0)
+        boundary = np.sqrt(2.0) / (in_size * kernel_size * kernel_size)
         kernel = np.random.normal(loc=0.0, scale=boundary, size=(out_size, in_size, kernel_size, kernel_size))
 
         return kernel
@@ -129,6 +134,6 @@ class ConvLayer:
         padded_tensor = np.pad(tensor, ((0, 0), (0, 0), (n, n), (n, n)), mode='constant', constant_values=0)
         return padded_tensor
     
-    def rotate_180(self, matrix):
-        rotated_matrix = np.rot90(matrix, 2, axes=(-1, -2))
-        return rotated_matrix
+    def rotate_180(self, tensor):
+        rotated_tensor = np.rot90(tensor, 2, axes=(-1, -2))
+        return rotated_tensor

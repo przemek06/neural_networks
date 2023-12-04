@@ -15,7 +15,7 @@ def standard_execution(X_train, X_val, X_test, y_test):
     X_val_reshaped = np.reshape(X_val, (X_val.shape[0], 1, side_length, side_length))
     X_test_reshaped = np.reshape(X_test, (X_test.shape[0], 1, side_length, side_length))
 
-    model = ConvAutoencoderModel(0.001, 20, 200, [144, 256, 784], [(1, 4, 3), (4, 4, 2)])
+    model = ConvAutoencoderModel(0.0001, 50, 200, [144, 256, 784], [(1, 4, 3), (4, 4, 2)])
     # model = AutoencoderModel(0.1, 20, 100, [784,108, 256, 784])
     # plot_weights("before_learning_hidden_layer.png", model._layers[0]._W)
 

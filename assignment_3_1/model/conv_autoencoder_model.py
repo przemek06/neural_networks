@@ -48,7 +48,7 @@ class ConvAutoencoderModel(Model):
                 y_pred = self.forward_propagation(x)  
                 dA = self.calculate_dA(y_pred, y_true)
                 self.backward_propagation(dA)
-                self.update(self._learning_rate)
+                self.update(self._learning_rate/(1 + math.log(epoch + 1, 2)))
                 i=i+self._batch_size
             
             y_probabilities = self.forward_propagation(X_valid)
