@@ -16,6 +16,7 @@ class Model:
         A = X
         for layer in self._layers:
             A = layer.forward_propagation(A)
+            # print(A.shape)
         return A
     
     def backward_propagation(self, dA):
@@ -52,6 +53,8 @@ class Model:
             y_train_probabilities = self.forward_propagation(X.T)
             loss = self.calculate_loss(y_train_probabilities, y.T)
             self.train_loss_data_point.append(loss)
+            print(epoch)
+            print(loss)
 
 
     def calculate_loss(self, y_pred, y):

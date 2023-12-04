@@ -12,6 +12,12 @@ class Layer:
         self._in_size = in_size
         self._out_size = out_size
 
+    # def batch_norm(self, x, epsilon=1e-5):
+    #     mean = np.mean(x, axis=1)
+    #     variance = np.var(x, axis=1)
+    #     x_normalized = (x.T - mean) / np.sqrt(variance + epsilon)
+        
+    #     return x_normalized.T
 
     def update(self, learning_rate):
         self._W=self._W - learning_rate*self._dW

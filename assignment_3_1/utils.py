@@ -49,7 +49,7 @@ def random_initializaton(out_size, in_size, lower=-0.1, upper=0.1):
     return weights
 
 def show_image(vector):
-    matrix_size = int(np.sqrt(len(vector)))
+    matrix_size = 28    
     matrix = vector.reshape((matrix_size, matrix_size))
     plt.imshow(matrix, cmap='gray')
     plt.title("Grayscale Image")
@@ -57,7 +57,7 @@ def show_image(vector):
     plt.show()
 
 def save_image(vector, name):
-    matrix_size = int(np.sqrt(len(vector)))
+    matrix_size = 28
     matrix = vector.reshape((matrix_size, matrix_size))
     plt.imshow(matrix, cmap='gray')
     plt.title("Grayscale Image")
@@ -89,6 +89,25 @@ def generate_layers(layer_sizes, hidden_layer_class, activation_layer_class):
     layers.append(activation_layer_class(final_in_size, final_out_size))
 
     return layers
+
+def generate_conv_layers(layer_sizes, activation_layer_class, conv_layer_class, pooling_layer_class, flatten_layer_class):
+    layers = []
+
+    for layer_size in layer_sizes:
+        conv_layer = conv_layer_class(layer_size[0], layer_size[1], layer_size[2])
+        activation_layer = activation_layer_class()
+        max_pooling_layer = pooling_layer_class()
+
+        layers.append(conv_layer)
+        layers.append(activation_layer)
+        layers.append(max_pooling_layer)
+
+    flatten_layer = flatten_layer_class()
+    layers.append(flatten_layer)
+
+    return layers
+
+
 
 def plot_weights(title, weights):
     normalized_weights = min_max_scaling(weights) * 255
